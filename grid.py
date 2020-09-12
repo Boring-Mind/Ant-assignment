@@ -1,9 +1,13 @@
-import time
 from typing import Tuple
 
 import cv2
-import fill_grid
 import numpy as np
+
+
+class CVUtils:
+    @classmethod
+    def rgb_to_bgr(cls, color: Tuple[int, int, int]) -> Tuple[int, int, int]:
+        return tuple(reversed(color))
 
 
 class Field(object):
@@ -15,7 +19,7 @@ class Field(object):
         self._image = __class__.create_blank(n, m)
 
     @classmethod
-    def sum_digits_in_tuple(cls, numbers: tuple) -> int:
+    def sum_digits_in_tuple(cls, numbers: Tuple[int]) -> int:
         return cls.sum_digits(''.join(map(str, numbers)))
 
     @classmethod
@@ -32,8 +36,6 @@ class Field(object):
         image = np.zeros((n, m, 3), np.uint8)
 
         color = (255, 255, 255)
-        # Since OpenCV uses BGR, convert the color first
-        # color = tuple(reversed(color))
         # Fill image with color
         image[:] = color
 
@@ -43,7 +45,9 @@ class Field(object):
         image = self.image
         rows = image.shape[0]
         cols = image.shape[1]
-        obstacle_color = tuple(reversed((200, 0, 0)))
+        
+        red = (200, 0, 0)
+        obstacle_color = CVUtils.rgb_to_bgr(red)
 
         for x in range(rows):
             for y in range(cols):
@@ -60,18 +64,35 @@ class Field(object):
 
         mask = np.zeros((height + 2, width + 2), np.uint8)
 
-        blocked_color = tuple(reversed((0, 0, 200)))
+        blue = (0, 0, 200)
+        blocked_color = CVUtils.rgb_to_bgr(blue)
 
         cv2.floodFill(image, mask, target, blocked_color)
+
+    def count_pixels_of_certain_color(
+        self, color: Tuple[int, int, int]
+    ) -> int:
+        """Count pixels of the specified color.
+
+        color: color in the RGB format.
+        """
+        image = self.image
+
+        color = CVUtils.rgb_to_bgr(color)
+
+        mask = cv2.inRange(image, color, color)
+        return cv2.countNonZero(mask)
 
 
 def main():
     field1 = Field(2000, 2000)
-    cv2.imwrite("image.png", field1.image)
+    cv2.imwrite("images/image.png", field1.image)
     field1.map_obstacles()
-    cv2.imwrite("result.png", field1.image)
+    cv2.imwrite("images/result.png", field1.image)
     field1.fill_available_space((1000, 1000))
-    cv2.imwrite("result1.png", field1.image)
+    cv2.imwrite("images/result1.png", field1.image)
+    count = field1.extract_filled_color((0, 0, 200))
+    print(count)
 
 
 if __name__ == '__main__':
