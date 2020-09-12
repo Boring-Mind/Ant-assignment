@@ -86,12 +86,10 @@ class Field(object):
 
 def main():
     field1 = Field(2000, 2000)
-    cv2.imwrite("images/image.png", field1.image)
     field1.map_obstacles()
-    cv2.imwrite("images/result.png", field1.image)
     field1.fill_available_space((1000, 1000))
-    cv2.imwrite("images/result1.png", field1.image)
-    count = field1.extract_filled_color((0, 0, 200))
+    # Substract the cell on which the ant is standing
+    count = field1.count_pixels_of_certain_color((0, 0, 200)) - 1
     print(count)
 
 
