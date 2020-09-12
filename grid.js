@@ -71,6 +71,7 @@ $(document).ready(function(){
         }
     }
 
+    // fill ant's avaliable fields
     flood_fill(ctx, 1000, 1000, 0xFF00FFFF);
 
     // mark current ant's position
